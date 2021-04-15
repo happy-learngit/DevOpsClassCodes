@@ -1,0 +1,55 @@
+pipeline{
+    tools{
+        jdk 'myjava'
+        maven 'mymaven'
+        
+    }
+    agent none
+    stages{
+        stage('Checkout'){
+           agent any
+           steps{
+               git 'https://github.com/edureka-git/DevOpsClassCodes.git'
+           }
+        }
+        stage(compile){
+            agent any
+            steps{
+                sh 'mvn compile'
+            }
+        
+        }
+        stage(code review){
+            agent any
+            steps{
+                sh 'mvn pmd:pmd'
+            }
+        
+        }
+        stage(unittest){
+            agent any
+            steps{
+                sh 'mvn test'
+            }
+        
+        }
+        stage('metriccheck'){
+            agent any
+            steps{
+                sh 'mvn cobertura:cobertura -Dcobertura.report.format=xml'
+            }
+			post{
+			     always{
+				       cobertura:coberturaReportfile:'target/site/cobertura/coverage.xml'
+					   }
+        
+        }
+        stage('package'){
+            agent any
+            steps{
+                sh 'package'
+            }
+        
+        }
+    }
+}
